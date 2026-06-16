@@ -1,0 +1,25 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Virtual environment
+.venv/
+venv/
+
+# Environment variables
+.env
+
+# OS / Editor
+.vscode/
+.DS_Store
+Thumbs.db
+
+# Runtime data
+data/logs/*
+data/unknown_faces/*
+
+# Keep empty folders
+!data/logs/.gitkeep
+!data/unknown_faces/.gitkeep
