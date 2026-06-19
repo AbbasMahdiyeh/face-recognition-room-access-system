@@ -20,6 +20,16 @@ data/authorized_faces/
 
 from pathlib import Path
 
+SUPPORTED_IMAGE_EXTENSIONS = (
+    ".jpg",
+    ".jpeg",
+    ".png",
+)
+
+UNSUPPORTED_IMAGE_EXTENSIONS = (
+    ".heic",
+    ".heif",
+)
 
 class DatasetManager:
     """
@@ -54,13 +64,17 @@ class DatasetManager:
 
         return sorted(users)
 
-    def list_user_images(self, user_name: str):
+    def list_user_images(self, user_name: str) -> list[Path]:
         """
-        Return all image files for one authorized user.
+        Return all supported image files for one authorized user.
 
-        This method will later be used by the face recognition
-        pipeline to load training/reference images for each
-        authorized person.
+        The current dataset policy supports JPG, JPEG, and PNG files.
+        HEIC/HEIF files are intentionally not loaded at this stage because
+        standard OpenCV installations may not read them reliably.
+
+        If HEIC support becomes necessary later, we will add a dedicated
+        conversion step instead of silently mixing unsupported files into
+        the recognition pipeline.
         """
 
         user_folder = self.dataset_root / user_name
@@ -68,12 +82,11 @@ class DatasetManager:
         if not user_folder.exists():
             return []
 
-        image_extensions = ("*.jpg", "*.jpeg", "*.png")
-
         image_paths = []
 
-        for extension in image_extensions:
-            image_paths.extend(user_folder.glob(extension))
+        for item in user_folder.iterdir():
+            if item.suffix.lower() in SUPPORTED_IMAGE_EXTENSIONS:
+                image_paths.append(item)
 
         return sorted(image_paths)
     
@@ -87,3 +100,25 @@ class DatasetManager:
         """
 
         return len(self.list_user_images(user_name))
+    
+    def list_unsupported_images(self, user_name: str) -> list[Path]:
+        """
+        Return unsupported image files found for one authorized user.
+
+        This helps detect dataset problems early. For example, many modern
+        phones save photos as HEIC/HEIF, but our current OpenCV-based
+        pipeline expects JPG, JPEG, or PNG files.
+        """
+
+        user_folder = self.dataset_root / user_name
+
+        if not user_folder.exists():
+            return []
+
+        unsupported_paths = []
+
+        for item in user_folder.iterdir():
+            if item.suffix.lower() in UNSUPPORTED_IMAGE_EXTENSIONS:
+                unsupported_paths.append(item)
+
+        return sorted(unsupported_paths)
