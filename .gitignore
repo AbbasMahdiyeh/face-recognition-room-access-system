@@ -23,3 +23,6 @@ data/unknown_faces/*
 # Keep empty folders
 !data/logs/.gitkeep
 !data/unknown_faces/.gitkeep
+
+data/embeddings/*.npy
+!data/embeddings/.gitkeep
