@@ -15,12 +15,23 @@ import cv2
 
 from room_access.recognition.recognition_engine import RecognitionResult
 
+from room_access.dashboard.theme import (
+    AUTHORIZED_COLOR,
+    UNAUTHORIZED_COLOR,
+    TEXT_COLOR,
+    LINE_THICKNESS,
+    CORNER_LENGTH,
+    FONT_SCALE,
+    FONT_THICKNESS,
+)
+from room_access.dashboard.status_bar import draw_status_bar
+
 def draw_corner_box(
     image,
     bbox: tuple[int, int, int, int],
     color: tuple[int, int, int],
-    thickness: int = 3,
-    corner_length: int = 35,
+    thickness = LINE_THICKNESS,
+    corner_length = CORNER_LENGTH ,
 ):
     """
     Draw a modern corner-style bounding box.
@@ -64,8 +75,8 @@ def draw_filled_label(
     x1, y1, x2, _ = bbox
 
     font = cv2.FONT_HERSHEY_SIMPLEX
-    font_scale = 0.65
-    thickness = 2
+    font_scale = FONT_SCALE
+    thickness = FONT_THICKNESS
     padding_x = 12
     padding_y = 8
 
@@ -101,7 +112,7 @@ def draw_filled_label(
         (label_x1 + padding_x, label_y2 - padding_y),
         font,
         font_scale,
-        (255, 255, 255),
+        TEXT_COLOR,
         thickness,
     )
 
@@ -119,11 +130,11 @@ def draw_recognition_overlay(
     annotated_image = image.copy()
 
     if result.access_granted:
-        color = (80, 180, 80)
+        color = AUTHORIZED_COLOR
         user_label = result.user_name or "Unknown"
         access_label = "ACCESS GRANTED"
     else:
-        color = (80, 80, 220)
+        color = UNAUTHORIZED_COLOR
         user_label = "Unknown"
         access_label = "ACCESS DENIED"
 
@@ -151,43 +162,11 @@ def draw_recognition_overlay(
             color,
         )
 
-    height = annotated_image.shape[0]
 
-    height, width = annotated_image.shape[:2]
-    bar_height = 65
-
-    cv2.rectangle(
-        annotated_image,
-        (0, height - bar_height),
-        (width, height),
-        color,
-        -1,
-    )
-
-    font = cv2.FONT_HERSHEY_SIMPLEX
-    font_scale = 1.0
-    thickness = 2
-
-    text_size, _ = cv2.getTextSize(
-        access_label,
-        font,
-        font_scale,
-        thickness,
-    )
-
-    text_width, text_height = text_size
-
-    text_x = (width - text_width) // 2
-    text_y = height - (bar_height - text_height) // 2
-
-    cv2.putText(
-        annotated_image,
-        access_label,
-        (text_x, text_y),
-        font,
-        font_scale,
-        (255, 255, 255),
-        thickness,
-    )
+        draw_status_bar(
+            annotated_image,
+            access_label,
+            color,
+        )
 
     return annotated_image
