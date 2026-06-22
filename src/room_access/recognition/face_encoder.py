@@ -12,9 +12,22 @@ The FaceEncoder is responsible only for:
 It does not decide whether access is granted or denied.
 That responsibility will belong to another component.
 """
+from dataclasses import dataclass
 
 import numpy as np
 from insightface.app import FaceAnalysis
+
+@dataclass
+class FaceEncodingResult:
+    """
+    Store the output of face encoding.
+
+    The embedding is used for recognition, while the bounding
+    box is used later for drawing visual feedback on the image.
+    """
+
+    embedding: np.ndarray
+    bbox: tuple[int, int, int, int]
 
 
 class FaceEncoder:
@@ -55,16 +68,17 @@ class FaceEncoder:
         height = face.bbox[3] - face.bbox[1]
 
         return width * height
-
-    def encode_largest_face(self, image) -> np.ndarray | None:
+    
+    def encode_largest_face_with_bbox(
+        self,
+        image,
+    ) -> FaceEncodingResult | None:
         """
-        Detect faces in an image and return the embedding of the largest face.
+        Detect the largest face and return both its embedding and bounding box.
 
-        If no face is detected, return None.
-
-        When multiple faces are found, the largest face is selected because
-        in an access-control scenario the main user is usually closest to
-        the camera.
+        Returning the bounding box is important for visual feedback.
+        The UI layer will use it to draw a green or red rectangle
+        around the recognized face.
         """
 
         faces = self.app.get(image)
@@ -77,4 +91,33 @@ class FaceEncoder:
             key=self._face_area,
         )
 
-        return largest_face.embedding
+        x1, y1, x2, y2 = map(
+            int,
+            largest_face.bbox,
+        )
+
+        return FaceEncodingResult(
+            embedding=largest_face.embedding,
+            bbox=(x1, y1, x2, y2),
+        )
+
+    def encode_largest_face(self, image) -> np.ndarray | None:
+        """
+        Detect faces in an image and return the embedding of the largest face.
+
+        If no face is detected, return None.
+
+        This method keeps the public API simple for components that only
+        need the embedding and do not need visual information such as bbox.
+        
+        When multiple faces are found, the largest face is selected because
+        in an access-control scenario the main user is usually closest to
+        the camera.
+        """
+
+        result = self.encode_largest_face_with_bbox(image)
+
+        if result is None:
+            return None
+
+        return result.embedding

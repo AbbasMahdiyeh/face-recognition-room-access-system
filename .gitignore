@@ -26,3 +26,5 @@ data/unknown_faces/*
 
 data/embeddings/*.npy
 !data/embeddings/.gitkeep
+
+data/sample_images/*_test.jpg

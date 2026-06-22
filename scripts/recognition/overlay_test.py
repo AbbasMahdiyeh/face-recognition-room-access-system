@@ -1,17 +1,8 @@
 """
-RecognitionEngine verification script.
+Recognition overlay verification script.
 
-This script verifies the complete recognition pipeline by
-passing one image into RecognitionEngine.
-
-RecognitionEngine internally coordinates:
-
-- FaceEncoder
-- FaceMatcher
-- EmbeddingStorage
-
-The test script is intentionally lightweight because
-all recognition logic belongs inside RecognitionEngine.
+This script runs RecognitionEngine on one image, draws
+the recognition overlay, and saves the annotated result.
 """
 
 import sys
@@ -24,12 +15,13 @@ src_path = project_root / "src"
 
 sys.path.insert(0, str(src_path))
 
+from room_access.dashboard.display_overlay import draw_recognition_overlay
 from room_access.recognition.recognition_engine import RecognitionEngine
 
 
 def main():
     """
-    Verify the complete face recognition pipeline.
+    Generate an annotated recognition image.
     """
 
     image_path = (
@@ -40,10 +32,17 @@ def main():
         / "abbas_01.jpg"
     )
 
+    output_path = (
+        project_root
+        / "data"
+        / "sample_images"
+        / "recognition_overlay_test.jpg"
+    )
+
     image = cv2.imread(str(image_path))
 
     if image is None:
-        print("Failed to load image.")
+        print("Failed to load image:", image_path)
         return
 
     engine = RecognitionEngine(
@@ -53,11 +52,17 @@ def main():
 
     result = engine.recognize(image)
 
-    print("User:", result.user_name)
-    print("Similarity:", result.similarity)
-    print("Access:", result.access_granted)
+    annotated_image = draw_recognition_overlay(
+        image,
+        result,
+    )
 
-    print("Bounding box:", result.bbox)
+    cv2.imwrite(
+        str(output_path),
+        annotated_image,
+    )
+
+    print("Saved overlay image to:", output_path)
 
 
 if __name__ == "__main__":

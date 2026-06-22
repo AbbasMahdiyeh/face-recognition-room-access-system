@@ -30,6 +30,7 @@ class RecognitionResult:
     user_name: str | None
     similarity: float
     access_granted: bool
+    bbox: tuple[int, int, int, int] | None
 
 
 class RecognitionEngine:
@@ -70,14 +71,19 @@ class RecognitionEngine:
         similarity score.
         """
 
-        query_embedding = self.encoder.encode_largest_face(image)
+        encoding_result = self.encoder.encode_largest_face_with_bbox(image)
 
-        if query_embedding is None:
+        if encoding_result is None:
             return RecognitionResult(
                 user_name=None,
                 similarity=0.0,
                 access_granted=False,
+                bbox= None,
             )
+        
+        # Extract the embedding from the encoding result.
+        # The bounding box will be used later for visualization.
+        query_embedding = encoding_result.embedding
 
         best_user = None
         best_similarity = -1.0
@@ -107,6 +113,7 @@ class RecognitionEngine:
                 user_name=None,
                 similarity=0.0,
                 access_granted=False,
+                bbox=encoding_result.bbox,
             )
 
         access_granted = best_similarity >= self.matcher.threshold
@@ -115,4 +122,5 @@ class RecognitionEngine:
             user_name=best_user,
             similarity=best_similarity,
             access_granted=access_granted,
+            bbox=encoding_result.bbox,
         )
