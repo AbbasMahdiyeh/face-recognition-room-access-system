@@ -1,33 +1,41 @@
 """
-InsightFace verification script.
+FaceEncoder verification script.
 
-This script checks whether InsightFace can load its model,
-detect a face in an authorized dataset image, and generate
-a face embedding.
+This script verifies that the project-level FaceEncoder
+can generate a real ArcFace embedding from an authorized
+dataset image.
 
-At this stage, we only test the AI model. Recognition and
-access decisions will be implemented later in src/.
+The script intentionally uses FaceEncoder instead of calling
+InsightFace directly. This keeps all InsightFace-specific
+logic isolated inside src/room_access/recognition/face_encoder.py.
 """
 
-from pathlib import Path
 import sys
+from pathlib import Path
 
 import cv2
-from insightface.app import FaceAnalysis
-
 
 project_root = Path(__file__).resolve().parents[2]
 src_path = project_root / "src"
 
 sys.path.insert(0, str(src_path))
 
+from room_access.recognition.face_encoder import FaceEncoder
+
 
 def main():
     """
-    Load one authorized face image and generate its embedding.
+    Load one authorized face image and generate its embedding
+    using the project's FaceEncoder abstraction.
     """
 
-    image_path = project_root / "data" / "authorized_faces" / "abbas" / "abbas_01.jpg"
+    image_path = (
+        project_root
+        / "data"
+        / "authorized_faces"
+        / "abbas"
+        / "abbas_01.jpg"
+    )
 
     image = cv2.imread(str(image_path))
 
@@ -38,29 +46,16 @@ def main():
     print("Image loaded:", image_path)
     print("Image shape:", image.shape)
 
-    # FaceAnalysis is InsightFace's high-level pipeline.
-    # It performs face detection, face alignment, and embedding extraction.
-    app = FaceAnalysis(name="buffalo_l")
+    encoder = FaceEncoder()
 
-    # ctx_id=-1 means CPU mode.
-    # This is important because we want the project to work on a laptop
-    # and later on Raspberry Pi without requiring a GPU.
-    app.prepare(ctx_id=-1)
+    embedding = encoder.encode_largest_face(image)
 
-    faces = app.get(image)
-
-    print("Detected faces:", len(faces))
-
-    if not faces:
-        print("No face detected.")
+    if embedding is None:
+        print("No face embedding generated.")
         return
 
-    face = faces[0]
-
-    embedding = face.embedding
-
     print("Embedding shape:", embedding.shape)
-    print("First 5 embedding values:", embedding[:5])
+    print("First 10 embedding values:", embedding[:10])
 
 
 if __name__ == "__main__":
