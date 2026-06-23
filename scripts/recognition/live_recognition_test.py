@@ -10,6 +10,7 @@ Press 'q' to exit.
 
 import sys
 import time
+from datetime import datetime
 from pathlib import Path
 import cv2
 
@@ -57,6 +58,8 @@ def main():
             print("Failed to read frame.")
             break
 
+        frame = cv2.resize(frame, (1280, 720))
+        
         frame_count += 1
 
         # Running the AI model on every frame is expensive on CPU.
@@ -64,11 +67,6 @@ def main():
         # result in between to keep the video stream responsive.
         if frame_count % recognition_interval == 0 or last_result is None:
             last_result = engine.recognize(frame)
-
-        annotated_frame = draw_recognition_overlay(
-            frame,
-            last_result,
-        )
 
         current_time = time.time()
         elapsed_time = current_time - previous_time
@@ -78,14 +76,20 @@ def main():
 
         previous_time = current_time
 
-        cv2.putText(
-            annotated_frame,
-            f"FPS: {fps:.1f}",
-            (20, 35),
-            cv2.FONT_HERSHEY_SIMPLEX,
-            0.8,
-            (0, 215, 255),
-            2,
+        face_count = 1 if last_result is not None and last_result.bbox is not None else 0
+
+        info_lines = [
+            ("Camera", "Laptop Webcam"),
+            ("FPS", f"{fps:.1f}"),
+            ("Faces", str(face_count)),
+            ("Time", datetime.now().strftime("%H:%M:%S")),
+            ("Temp", "-- °C"),
+        ]
+
+        annotated_frame = draw_recognition_overlay(
+            frame,
+            last_result,
+            info_lines,
         )
 
         cv2.imshow(
@@ -93,7 +97,9 @@ def main():
             annotated_frame,
         )
 
-        if cv2.waitKey(1) & 0xFF == ord("q"):
+        key = cv2.waitKey(30) & 0xFF
+
+        if key == ord("q") or key == 27:
             break
 
     camera.release()

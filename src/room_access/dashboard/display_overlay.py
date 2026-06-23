@@ -25,6 +25,7 @@ from room_access.dashboard.theme import (
     FONT_THICKNESS,
 )
 from room_access.dashboard.status_bar import draw_status_bar
+from room_access.dashboard.info_panel import draw_info_panel
 
 def draw_corner_box(
     image,
@@ -119,6 +120,7 @@ def draw_filled_label(
 def draw_recognition_overlay(
     image,
     result: RecognitionResult,
+    info_lines: list[tuple[str, str]] | None = None,
 ):
     """
     Draw visual feedback for a recognition result.
@@ -144,9 +146,9 @@ def draw_recognition_overlay(
         x1, y1, x2, y2 = bbox
 
         label_text = (
-            f"ID: {user_label} | AUTHORIZED"
+            f"{user_label.upper()} | AUTHORIZED"
             if result.access_granted
-            else "ID: UNKNOWN | UNAUTHORIZED"
+            else "UNKNOWN | UNAUTHORIZED"
         )
 
         draw_corner_box(
@@ -162,11 +164,25 @@ def draw_recognition_overlay(
             color,
         )
 
+        if info_lines is None:
+            info_lines = [
+                ("Camera", "Laptop Webcam"),
+                ("FPS", "--"),
+                ("Faces", "0"),
+                ("Time", "--:--:--"),
+                ("Temp", "-- °C"),
+            ]
+
+        draw_info_panel(
+            annotated_image,
+            info_lines,
+        )
 
         draw_status_bar(
             annotated_image,
             access_label,
             color,
+            result.access_granted,
         )
 
     return annotated_image
