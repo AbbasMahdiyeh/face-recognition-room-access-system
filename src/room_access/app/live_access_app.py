@@ -19,7 +19,7 @@ from room_access.dashboard.display_overlay import draw_recognition_overlay
 from room_access.recognition.recognition_engine import RecognitionEngine
 from room_access.storage.event_logger import EventLogger
 from room_access.config.settings import Settings
-from room_access.hardware.led_controller import MockLEDController
+from room_access.hardware.hardware_factory import HardwareFactory
 from room_access.hardware.temperature_sensor import MockTemperatureSensor
 
 
@@ -55,7 +55,12 @@ class LiveAccessApp:
             log_path="data/logs/access_events.csv",
         )
 
-        self.led_controller = MockLEDController()
+        # Hardware controllers are created through a factory so the
+        # application can switch between mock laptop hardware and
+        # Raspberry Pi GPIO hardware without changing this workflow.
+        self.led_controller = HardwareFactory.create_led_controller(
+            self.settings,
+        )
 
         self.temperature_sensor = MockTemperatureSensor()
 
