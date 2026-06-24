@@ -18,6 +18,7 @@ from room_access.camera.laptop_webcam_camera import LaptopWebcamCamera
 from room_access.dashboard.display_overlay import draw_recognition_overlay
 from room_access.recognition.recognition_engine import RecognitionEngine
 from room_access.storage.event_logger import EventLogger
+from room_access.config.settings import Settings
 
 
 class LiveAccessApp:
@@ -33,11 +34,15 @@ class LiveAccessApp:
         created here so they are not recreated for every video frame.
         """
 
+        self.settings = Settings()
         self.camera = LaptopWebcamCamera()
 
         self.engine = RecognitionEngine(
             embeddings_root="data/embeddings",
-            threshold=0.5,
+            threshold=self.settings.get(
+                "recognition",
+                "threshold",
+            ),
         )
 
         self.decision_manager = AccessDecisionManager()
@@ -46,8 +51,15 @@ class LiveAccessApp:
             log_path="data/logs/access_events.csv",
         )
 
-        self.recognition_interval = 20
-        self.repeat_log_interval_seconds = 10.0
+        self.recognition_interval = self.settings.get(
+            "recognition",
+            "recognition_interval",
+        )
+        
+        self.repeat_log_interval_seconds = self.settings.get(
+            "logging",
+            "repeat_log_interval_seconds",
+        )
 
     def run(self):
         """
@@ -81,7 +93,10 @@ class LiveAccessApp:
 
             frame = cv2.resize(
                 frame,
-                (1280, 720),
+                (
+                    self.settings.get("display", "width"),
+                    self.settings.get("display", "height"),
+                ),
             )
 
             frame_count += 1

@@ -1,0 +1,20 @@
+{
+  "recognition": {
+    "threshold": 0.5,
+    "recognition_interval": 20
+  },
+  "enrollment": {
+    "capture_count": 5
+  },
+  "logging": {
+    "repeat_log_interval_seconds": 10.0
+  },
+  "display": {
+    "width": 1280,
+    "height": 720
+  },
+  "camera": {
+    "name": "Laptop Webcam",
+    "index": 0
+  }
+}
