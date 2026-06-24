@@ -28,3 +28,7 @@ data/embeddings/*.npy
 !data/embeddings/.gitkeep
 
 data/sample_images/*_test.jpg
+data/logs/*.csv
+
+# Runtime event data
+data/events/
