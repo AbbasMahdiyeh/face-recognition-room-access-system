@@ -19,6 +19,7 @@ from room_access.dashboard.display_overlay import draw_recognition_overlay
 from room_access.recognition.recognition_engine import RecognitionEngine
 from room_access.storage.event_logger import EventLogger
 from room_access.config.settings import Settings
+from room_access.hardware.led_controller import MockLEDController
 
 
 class LiveAccessApp:
@@ -50,6 +51,8 @@ class LiveAccessApp:
         self.logger = EventLogger(
             log_path="data/logs/access_events.csv",
         )
+
+        self.led_controller = MockLEDController()
 
         self.recognition_interval = self.settings.get(
             "recognition",
@@ -151,6 +154,10 @@ class LiveAccessApp:
 
                 current_identity = decision.user_name
                 current_access = decision.access_granted
+
+                self.led_controller.show_access_result(
+                    access_granted=current_access,
+                )
 
                 identity_changed = (
                     current_identity != last_logged_identity
