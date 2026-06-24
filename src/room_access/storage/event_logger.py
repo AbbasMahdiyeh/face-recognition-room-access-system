@@ -44,6 +44,7 @@ class EventLogger:
             "recognition_time_ms",
             "temperature",
             "image_path",
+            "reason",
         ]
 
         if not self.log_path.exists():
@@ -76,6 +77,7 @@ class EventLogger:
         recognition_time_ms: float,
         temperature: str = "--",
         image_path: str = "",
+        reason: str = "",
     ):
         """
         Append one access-control event to the CSV log.
@@ -91,6 +93,7 @@ class EventLogger:
             "recognition_time_ms": round(recognition_time_ms, 2),
             "temperature": temperature,
             "image_path": image_path,
+            "reason": reason,
         }
 
         with self.log_path.open(

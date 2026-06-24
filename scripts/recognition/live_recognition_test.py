@@ -23,6 +23,7 @@ from room_access.camera.laptop_webcam_camera import LaptopWebcamCamera
 from room_access.dashboard.display_overlay import draw_recognition_overlay
 from room_access.recognition.recognition_engine import RecognitionEngine
 from room_access.storage.event_logger import EventLogger
+from room_access.access_control.access_decision import AccessDecisionManager
 
 
 def main():
@@ -40,6 +41,8 @@ def main():
         embeddings_root="data/embeddings",
         threshold=0.5,
     )
+
+    decision_manager = AccessDecisionManager()
 
     logger = EventLogger(
     log_path="data/logs/access_events.csv"
@@ -117,8 +120,13 @@ def main():
         if last_result is not None:
             now = time.time()
 
-            current_identity = last_result.user_name or "Unknown"
-            current_access = last_result.access_granted
+            decision = decision_manager.decide(
+                user_name=last_result.user_name,
+                access_granted=last_result.access_granted,
+            )
+
+            current_identity = decision.user_name
+            current_access = decision.access_granted
 
             identity_changed = (
                 current_identity != last_logged_identity
@@ -151,6 +159,7 @@ def main():
                     fps=fps,
                     recognition_time_ms=recognition_time_ms,
                     temperature="--",
+                    reason=decision.reason,
                 )
 
                 last_logged_identity = current_identity
