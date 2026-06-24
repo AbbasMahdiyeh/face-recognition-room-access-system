@@ -1,8 +1,10 @@
 """
 Camera interface definition.
 
-Every camera implementation in the project must
-follow this contract.
+Every camera implementation in the project must follow this contract.
+This allows the application to switch between laptop webcam,
+USB camera, and Raspberry Pi camera backends without changing
+the application workflow.
 """
 
 from abc import ABC, abstractmethod
@@ -14,8 +16,25 @@ class CameraInterface(ABC):
     """
 
     @abstractmethod
-    def get_frame(self):
+    def open(self) -> bool:
         """
-        Return a single image frame.
+        Open the camera stream.
         """
+
+        pass
+
+    @abstractmethod
+    def read_frame(self):
+        """
+        Read and return a single image frame.
+        """
+
+        pass
+
+    @abstractmethod
+    def release(self):
+        """
+        Release the camera resource.
+        """
+
         pass

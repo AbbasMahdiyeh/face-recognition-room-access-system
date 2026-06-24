@@ -14,12 +14,13 @@ from datetime import datetime
 import cv2
 
 from room_access.access_control.access_decision import AccessDecisionManager
-from room_access.camera.laptop_webcam_camera import LaptopWebcamCamera
+from room_access.camera.camera_factory import CameraFactory
 from room_access.dashboard.display_overlay import draw_recognition_overlay
 from room_access.recognition.recognition_engine import RecognitionEngine
 from room_access.storage.event_logger import EventLogger
 from room_access.config.settings import Settings
 from room_access.hardware.led_controller import MockLEDController
+from room_access.hardware.temperature_sensor import MockTemperatureSensor
 
 
 class LiveAccessApp:
@@ -36,7 +37,9 @@ class LiveAccessApp:
         """
 
         self.settings = Settings()
-        self.camera = LaptopWebcamCamera()
+        self.camera = CameraFactory.create_camera(
+            self.settings,
+        )
 
         self.engine = RecognitionEngine(
             embeddings_root="data/embeddings",
@@ -53,6 +56,8 @@ class LiveAccessApp:
         )
 
         self.led_controller = MockLEDController()
+
+        self.temperature_sensor = MockTemperatureSensor()
 
         self.recognition_interval = self.settings.get(
             "recognition",
@@ -86,6 +91,12 @@ class LiveAccessApp:
         last_log_time = 0.0
         last_logged_identity = None
         last_logged_access = None
+
+        camera_name = self.settings.get(
+            "camera",
+            "name",
+            "Unknown Camera",
+        )
 
         while True:
             frame = self.camera.read_frame()
@@ -129,13 +140,16 @@ class LiveAccessApp:
                 else 0
             )
 
+            temperature = self.temperature_sensor.read_temperature()
+            temperature_text = f"{temperature:.1f} C"
+
             info_lines = [
-                ("Camera", "Laptop Webcam"),
+                ("Camera", camera_name),
                 ("FPS", f"{fps:.1f}"),
                 ("Faces", str(face_count)),
                 ("AI Time", f"{recognition_time_ms:.1f} ms"),
                 ("Time", datetime.now().strftime("%H:%M:%S")),
-                ("Temp", "-- °C"),
+                ("Temp", temperature_text),
             ]
 
             annotated_frame = draw_recognition_overlay(
@@ -180,12 +194,12 @@ class LiveAccessApp:
                         user_name=current_identity,
                         access_granted=current_access,
                         similarity=last_result.similarity,
-                        camera="Laptop Webcam",
                         fps=fps,
                         recognition_time_ms=recognition_time_ms,
-                        temperature="--",
+                        temperature=temperature_text,
                         image_path=image_path,
                         reason=decision.reason,
+                        camera=camera_name,
                     )
 
                     last_logged_identity = current_identity

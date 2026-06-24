@@ -14,7 +14,8 @@
     "height": 720
   },
   "camera": {
-    "name": "Laptop Webcam",
-    "index": 0
-  }
+  "backend": "laptop",
+  "name": "Laptop Webcam",
+  "index": 0
+}
 }
