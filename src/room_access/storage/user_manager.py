@@ -34,6 +34,7 @@ Future extensions
 """
 
 from pathlib import Path
+import shutil
 
 
 class UserManager:
@@ -82,3 +83,32 @@ class UserManager:
             )
 
         return users
+    
+    def delete_user(
+        self,
+        user_name: str,
+    ) -> bool:
+        """
+        Delete one authorized user from the local dataset.
+
+        This removes both:
+        - the user's reference image folder
+        - the user's stored embedding file
+
+        Returns True if at least one user-related item was deleted.
+        """
+
+        deleted_anything = False
+
+        user_dir = self.dataset_root / user_name
+        embedding_path = self.embeddings_root / f"{user_name}.npy"
+
+        if user_dir.exists():
+            shutil.rmtree(user_dir)
+            deleted_anything = True
+
+        if embedding_path.exists():
+            embedding_path.unlink()
+            deleted_anything = True
+
+        return deleted_anything

@@ -27,6 +27,7 @@ def main():
         print("  python main.py enroll <user_name>")
         print("  python main.py enroll-all")
         print("  python main.py users")
+        print("  python main.py delete-user <user_name>")
         return
 
     command = sys.argv[1]
@@ -81,6 +82,21 @@ def main():
             print("-" * 50)
 
         print(f"Total users: {len(users)}")
+
+    elif command == "delete-user":
+        if len(sys.argv) < 3:
+            print("Usage: python main.py delete-user <user_name>")
+            return
+
+        user_name = sys.argv[2]
+
+        manager = UserManager()
+        deleted = manager.delete_user(user_name)
+
+        if deleted:
+            print(f"User deleted: {user_name}")
+        else:
+            print(f"User not found: {user_name}")
 
     else:
         print("Unknown command:", command)
