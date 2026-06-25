@@ -21,6 +21,7 @@
 
   "hardware": {
   "led_backend": "mock",
+  "temperature_backend": "mock",
   "green_led_pin": 17,
   "red_led_pin": 27
   }

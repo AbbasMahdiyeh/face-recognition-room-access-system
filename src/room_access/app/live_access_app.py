@@ -20,7 +20,8 @@ from room_access.recognition.recognition_engine import RecognitionEngine
 from room_access.storage.event_logger import EventLogger
 from room_access.config.settings import Settings
 from room_access.hardware.hardware_factory import HardwareFactory
-from room_access.hardware.temperature_sensor import MockTemperatureSensor
+from room_access.hardware.temperature_factory import TemperatureFactory
+
 
 
 class LiveAccessApp:
@@ -62,7 +63,14 @@ class LiveAccessApp:
             self.settings,
         )
 
-        self.temperature_sensor = MockTemperatureSensor()
+        # Create the configured temperature sensor backend.
+        # The application remains independent from the concrete
+        # sensor implementation (mock or Raspberry Pi).
+        self.temperature_sensor = (
+            TemperatureFactory.create_temperature_sensor(
+                self.settings,
+            )
+        )
 
         self.recognition_interval = self.settings.get(
             "recognition",

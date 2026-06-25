@@ -14,6 +14,7 @@ from room_access.app.enrollment_app import EnrollmentApp
 from room_access.app.live_access_app import LiveAccessApp
 from room_access.recognition.enrollment_manager import EnrollmentManager
 from room_access.storage.user_manager import UserManager
+from room_access.storage.statistics_manager import StatisticsManager
 
 
 def main():
@@ -28,6 +29,7 @@ def main():
         print("  python main.py enroll-all")
         print("  python main.py users")
         print("  python main.py delete-user <user_name>")
+        print("  python main.py stats")
         return
 
     command = sys.argv[1]
@@ -97,6 +99,30 @@ def main():
             print(f"User deleted: {user_name}")
         else:
             print(f"User not found: {user_name}")
+
+    elif command == "stats":
+        manager = StatisticsManager()
+        summary = manager.get_summary()
+
+        print()
+        print("=" * 50)
+        print("Access Statistics")
+        print("=" * 50)
+        print(f"Total Events   : {summary['total_events']}")
+        print(f"Access Granted : {summary['granted']}")
+        print(f"Access Denied  : {summary['denied']}")
+
+        last_event = summary["last_event"]
+
+        if last_event is not None:
+            print("-" * 50)
+            print("Last Event")
+            print(f"Time   : {last_event['timestamp']}")
+            print(f"User   : {last_event['user_name']}")
+            print(f"Access : {last_event['access_granted']}")
+            print(f"Reason : {last_event.get('reason', '')}")
+
+        print("=" * 50)
 
     else:
         print("Unknown command:", command)
