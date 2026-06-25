@@ -33,21 +33,28 @@ The project follows a clean and modular software architecture and is developed i
 
 ## Technology Stack
 
-### Software
+### Core Technologies
 
 - Python
 - OpenCV
+- InsightFace
+- ONNX Runtime
 - NumPy
+
+### Development Environment
+
 - Git
 - GitHub
+- Visual Studio Code
 
 ### Hardware (Planned)
 
 - Raspberry Pi 4
 - Raspberry Pi Camera Module
 - SD Card
+- Green / Red LEDs
+- Temperature Sensor
 - GPIO
-- LED / Relay Simulation
 
 ---
 
@@ -57,11 +64,14 @@ Current architecture:
 
 ```text
 room_access
-├── camera
-├── recognition
 ├── access_control
-├── storage
-└── dashboard
+├── app
+├── camera
+├── config
+├── dashboard
+├── hardware
+├── recognition
+└── storage
 ```
 
 Each module has a single responsibility and can be extended independently.
@@ -101,7 +111,92 @@ Raspberry Pi integration
 GPIO integration
 
 ---
-
 ## Current Status
 
-Project initialization completed.
+The project currently includes the following implemented features:
+
+- Real-time face recognition
+- Live dashboard overlay
+- Authorized user enrollment
+- Automatic embedding generation
+- Event logging to CSV
+- Event image capture
+- Camera factory and registry
+- Hardware factory and registry
+- Mock LED controller
+- Mock temperature sensor
+- Centralized configuration system
+- Raspberry Pi ready architecture
+
+---
+
+## Running the Project
+
+### Run the live access control system
+
+```bash
+python main.py live
+```
+
+### Enroll a new authorized user
+
+```bash
+python main.py enroll <user_name>
+```
+
+Example:
+
+```bash
+python main.py enroll abbas
+```
+
+### Rebuild embeddings for all authorized users
+
+```bash
+python main.py enroll-all
+```
+
+---
+
+## Configuration
+
+Project configuration is stored in:
+
+```text
+config/settings.json
+```
+
+Current configurable components include:
+
+- Recognition threshold
+- Camera backend
+- Display resolution
+- Recognition interval
+- Hardware backend
+- Enrollment capture count
+
+---
+
+## Runtime Data
+
+The following folders are generated automatically during execution:
+
+```text
+data/events/
+data/logs/
+data/embeddings/
+```
+
+These files are excluded from Git where appropriate.
+
+---
+
+## Future Work
+
+- Raspberry Pi Camera integration
+- Real Raspberry Pi GPIO integration
+- Physical temperature sensor integration
+- Final production UI
+- Documentation improvements
+- UML diagrams
+- Version 1.0 release

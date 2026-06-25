@@ -13,6 +13,7 @@ sys.path.insert(0, str(src_path))
 from room_access.app.enrollment_app import EnrollmentApp
 from room_access.app.live_access_app import LiveAccessApp
 from room_access.recognition.enrollment_manager import EnrollmentManager
+from room_access.storage.user_manager import UserManager
 
 
 def main():
@@ -25,6 +26,7 @@ def main():
         print("  python main.py live")
         print("  python main.py enroll <user_name>")
         print("  python main.py enroll-all")
+        print("  python main.py users")
         return
 
     command = sys.argv[1]
@@ -55,6 +57,30 @@ def main():
 
         for path in saved_paths:
             print("-", path)
+
+    elif command == "users":
+        manager = UserManager()
+
+        users = manager.list_users()
+
+        print()
+        print("=" * 50)
+        print("Authorized Users")
+        print("=" * 50)
+
+        for user in users:
+            embedding = (
+                "YES"
+                if user["has_embedding"]
+                else "NO"
+            )
+
+            print(f"User: {user['user_name']}")
+            print(f"Images: {user['image_count']}")
+            print(f"Embedding: {embedding}")
+            print("-" * 50)
+
+        print(f"Total users: {len(users)}")
 
     else:
         print("Unknown command:", command)
