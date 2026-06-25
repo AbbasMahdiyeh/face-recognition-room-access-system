@@ -16,6 +16,54 @@ from room_access.recognition.enrollment_manager import EnrollmentManager
 from room_access.storage.user_manager import UserManager
 from room_access.storage.statistics_manager import StatisticsManager
 
+from room_access.app.version import (
+    AI_ENGINE,
+    COMPUTER_VISION,
+    DEVELOPER,
+    GITHUB,
+    LANGUAGE,
+    LICENSE,
+    PLATFORM,
+    PROGRAM,
+    PROJECT_NAME,
+    SPECIALIZATION,
+    STATUS,
+    UNIVERSITY,
+    VERSION,
+)
+
+
+def print_usage():
+    """
+    Print the command-line usage guide.
+    """
+
+    print()
+    print("=" * 70)
+    print("Face Recognition Room Access System")
+    print("Command Line Interface")
+    print("=" * 70)
+    print()
+    print("Usage:")
+    print("    python main.py <command>")
+    print()
+    print("Commands:")
+    print("    live            Start real-time face recognition")
+    print("    enroll          Register a new authorized user")
+    print("    enroll-all      Rebuild embeddings for all users")
+    print("    users           List all authorized users")
+    print("    delete-user     Delete an authorized user")
+    print("    stats           Display access statistics")
+    print("    version         Display project information")
+    print()
+    print("Examples:")
+    print("    python main.py live")
+    print("    python main.py enroll abbas")
+    print("    python main.py users")
+    print("    python main.py stats")
+    print("    python main.py version")
+    print()
+    print("=" * 70)
 
 def main():
     """
@@ -23,13 +71,7 @@ def main():
     """
 
     if len(sys.argv) < 2:
-        print("Usage:")
-        print("  python main.py live")
-        print("  python main.py enroll <user_name>")
-        print("  python main.py enroll-all")
-        print("  python main.py users")
-        print("  python main.py delete-user <user_name>")
-        print("  python main.py stats")
+        print_usage()
         return
 
     command = sys.argv[1]
@@ -124,8 +166,53 @@ def main():
 
         print("=" * 50)
 
+    elif command == "version":
+        print()
+        print("=" * 70)
+        print(PROJECT_NAME.center(70))
+        print("=" * 70)
+
+        print(f"{'Version':18}: {VERSION}")
+        print(f"{'Status':18}: {STATUS}")
+
+        print("-" * 70)
+
+        print(f"{'Developer':18}: {DEVELOPER}")
+        print(f"{'University':18}: {UNIVERSITY}")
+        print(f"{'Program':18}: {PROGRAM}")
+        print(f"{'Specialization':18}: {SPECIALIZATION}")
+
+        print("-" * 70)
+
+        print(f"{'AI Engine':18}: {AI_ENGINE}")
+        print(f"{'Computer Vision':18}: {COMPUTER_VISION}")
+        print(f"{'Language':18}: {LANGUAGE}")
+        print(f"{'Platform':18}: {PLATFORM}")
+
+        print("-" * 70)
+
+        print(f"{'License':18}: {LICENSE}")
+        print(f"{'GitHub':18}: {GITHUB}")
+
+        print("=" * 70)
+        print()
+
+        print("Available Commands")
+        print("-" * 70)
+
+        print("  live            Start real-time face recognition")
+        print("  enroll          Register a new authorized user")
+        print("  enroll-all      Rebuild embeddings for all users")
+        print("  users           List all authorized users")
+        print("  delete-user     Remove an authorized user")
+        print("  stats           Show access statistics")
+        print("  version         Show project information")
+
+        print("=" * 70)
+
     else:
         print("Unknown command:", command)
+        print_usage()
 
 
 if __name__ == "__main__":
