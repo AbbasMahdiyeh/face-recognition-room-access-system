@@ -17,34 +17,31 @@ HardwareFactory without modifying the application logic.
 
 Platform
 --------
-This module is intended to run only on Raspberry Pi systems with
-the RPi.GPIO library installed.
+This module is intended to run on Raspberry Pi systems with
+gpiozero installed.
 
 Development Note
 ----------------
-The RPi.GPIO package is available only on Raspberry Pi systems.
+gpiozero is a Raspberry Pi-oriented GPIO library.
 
-For this reason, the import is wrapped in a try/except block so the
-entire project remains importable and fully developable on non-
-Raspberry Pi platforms such as Windows.
+The import is wrapped in a try/except block so the project remains
+importable and developable on non-Raspberry Pi platforms such as Windows.
 
 Implementation Note
 -------------------
-RPi.GPIO was selected as the GPIO backend because it provides a
-lightweight and reliable interface for the hardware used in this
-project.
-
-The implementation has been validated on the target Raspberry Pi
-hardware during the hardware integration phase.
+gpiozero was selected because it was successfully validated with the
+actual project LED wiring during Raspberry Pi hardware setup.
 """
 
+# gpiozero is only available on Raspberry Pi.
+# During Windows development this import is expected to be unresolved.
 try:
-    import RPi.GPIO as GPIO
-    GPIO_AVAILABLE = True
+    from gpiozero import LED
+    GPIOZERO_AVAILABLE = True
 
 except ImportError:
-    GPIO = None
-    GPIO_AVAILABLE = False
+    LED = None
+    GPIOZERO_AVAILABLE = False
 
 
 class RaspberryPiLEDController:
@@ -64,20 +61,18 @@ class RaspberryPiLEDController:
         red_pin is turned on when access is denied.
         """
 
-        if not GPIO_AVAILABLE:
+        if not GPIOZERO_AVAILABLE:
             raise RuntimeError(
-                "RPi.GPIO is not available. "
-                "This controller can only run on Raspberry Pi."
+                "gpiozero is not available. "
+                "This controller can only run on Raspberry Pi. "
                 "Use MockLEDController on non-Raspberry Pi systems."
             )
+        
+        assert LED is not None
 
-        self.green_pin = green_pin
-        self.red_pin = red_pin
+        self.green_led = LED(green_pin)
+        self.red_led = LED(red_pin)
         self.last_access_granted = None
-
-        GPIO.setmode(GPIO.BCM)
-        GPIO.setup(self.green_pin, GPIO.OUT)
-        GPIO.setup(self.red_pin, GPIO.OUT)
 
         self.turn_off()
 
@@ -93,11 +88,11 @@ class RaspberryPiLEDController:
             return
 
         if access_granted:
-            GPIO.output(self.green_pin, GPIO.HIGH)
-            GPIO.output(self.red_pin, GPIO.LOW)
+            self.green_led.on()
+            self.red_led.off()
         else:
-            GPIO.output(self.green_pin, GPIO.LOW)
-            GPIO.output(self.red_pin, GPIO.HIGH)
+            self.green_led.off()
+            self.red_led.on()
 
         self.last_access_granted = access_granted
 
@@ -106,13 +101,12 @@ class RaspberryPiLEDController:
         Turn both LEDs off.
         """
 
-        GPIO.output(self.green_pin, GPIO.LOW)
-        GPIO.output(self.red_pin, GPIO.LOW)
+        self.green_led.off()
+        self.red_led.off()
 
     def cleanup(self):
         """
-        Release GPIO resources safely.
+        Turn off LEDs before application shutdown.
         """
 
         self.turn_off()
-        GPIO.cleanup()
