@@ -15,6 +15,7 @@ from room_access.app.live_access_app import LiveAccessApp
 from room_access.recognition.enrollment_manager import EnrollmentManager
 from room_access.storage.user_manager import UserManager
 from room_access.storage.statistics_manager import StatisticsManager
+from room_access.app.health_check import HealthCheck
 
 from room_access.app.version import (
     AI_ENGINE,
@@ -55,6 +56,7 @@ def print_usage():
     print("    delete-user     Delete an authorized user")
     print("    stats           Display access statistics")
     print("    version         Display project information")
+    print("    check           Run system health check")
     print()
     print("Examples:")
     print("    python main.py live")
@@ -62,6 +64,7 @@ def print_usage():
     print("    python main.py users")
     print("    python main.py stats")
     print("    python main.py version")
+    print("    python main.py check")
     print()
     print("=" * 70)
 
@@ -207,6 +210,37 @@ def main():
         print("  delete-user     Remove an authorized user")
         print("  stats           Show access statistics")
         print("  version         Show project information")
+
+        print("=" * 70)
+
+    elif command == "check":
+        checker = HealthCheck()
+        results = checker.run()
+
+        print()
+        print("=" * 70)
+        print("System Health Check")
+        print("=" * 70)
+
+        all_ok = True
+
+        for key, value in results.items():
+            if isinstance(value, bool):
+                status = "OK" if value else "MISSING"
+
+                if not value and key != "is_raspberry_pi":
+                    all_ok = False
+
+                print(f"{key:30}: {status}")
+            else:
+                print(f"{key:30}: {value}")
+
+        print("-" * 70)
+
+        if all_ok:
+            print("System Status                 : READY")
+        else:
+            print("System Status                 : WARNING")
 
         print("=" * 70)
 
