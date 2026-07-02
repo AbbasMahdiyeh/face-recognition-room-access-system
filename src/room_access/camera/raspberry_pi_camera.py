@@ -1,46 +1,116 @@
 """
 Raspberry Pi camera implementation.
 
-This module provides the Raspberry Pi implementation of the
-CameraInterface.
+Purpose
+-------
+Capture frames from the Raspberry Pi Camera Module using Picamera2.
 
-The current version is a placeholder. A future implementation
-will use the Picamera2 library while preserving the same public
-interface as LaptopWebcamCamera. This allows the application to
-switch camera backends without changing the application logic.
+Architecture
+------------
+This class implements the same public camera interface used by the
+laptop webcam backend:
+
+- open()
+- read_frame()
+- release()
+
+Because all camera backends follow the same interface, LiveAccessApp
+can switch between laptop webcam and Raspberry Pi camera through
+CameraFactory without changing the application workflow.
+
+Platform
+--------
+This module is intended to run on Raspberry Pi OS with Picamera2
+installed.
+
+Development Note
+----------------
+Picamera2 is only available on Raspberry Pi systems. The import is
+wrapped in a try/except block so the project remains importable during
+Windows development.
 """
 
+import cv2
+
 from .camera_interface import CameraInterface
+
+try:
+    from picamera2 import Picamera2  # type: ignore
+except ImportError:
+    Picamera2 = None
 
 
 class RaspberryPiCamera(CameraInterface):
     """
-    Raspberry Pi camera implementation placeholder.
+    Capture image frames from the Raspberry Pi Camera Module.
     """
+
+    def __init__(
+        self,
+        width: int = 1280,
+        height: int = 720,
+    ):
+        """
+        Store camera resolution settings.
+
+        The actual Picamera2 object is created in open() so the camera
+        resource is only allocated when the application starts.
+        """
+
+        self.width = width
+        self.height = height
+        self.camera = None
 
     def open(self) -> bool:
         """
-        Open the Raspberry Pi camera stream.
+        Open and start the Raspberry Pi camera stream.
         """
 
-        raise NotImplementedError(
-            "Raspberry Pi camera integration is not implemented yet."
+        if Picamera2 is None:
+            print("Picamera2 is not installed or not available.")
+            return False
+
+        self.camera = Picamera2()
+
+        config = self.camera.create_preview_configuration(
+            main={
+                "size": (self.width, self.height),
+                "format": "RGB888",
+            }
         )
+
+        self.camera.configure(config)
+        self.camera.start()
+
+        return True
 
     def read_frame(self):
         """
         Read one frame from the Raspberry Pi camera.
+
+        Picamera2 returns RGB frames, while OpenCV uses BGR frames.
+        The conversion keeps the rest of the computer vision pipeline
+        consistent with the laptop webcam backend.
         """
 
-        raise NotImplementedError(
-            "Raspberry Pi camera frame reading is not implemented yet."
+        if self.camera is None:
+            return None
+
+        frame = self.camera.capture_array()
+
+        if frame is None:
+            return None
+
+        return cv2.cvtColor(
+            frame,
+            cv2.COLOR_RGB2BGR,
         )
 
     def release(self):
         """
-        Release the Raspberry Pi camera resource.
+        Stop the camera stream and release the camera resource.
         """
 
-        raise NotImplementedError(
-            "Raspberry Pi camera release is not implemented yet."
-        )
+        if self.camera is not None:
+            self.camera.stop()
+            self.camera = None

@@ -1,24 +1,41 @@
 """
 Raspberry Pi GPIO LED controller.
 
-Platform Note
--------------
-This module targets Raspberry Pi hardware.
-
-It is intentionally included in the project during development so the
-complete hardware architecture is visible before deployment.
-
-On non-Raspberry Pi systems this module is expected to remain unused.
-The application will use MockLEDController instead.
-
 Purpose
 -------
-This controller manages the real green and red status LEDs connected
-to Raspberry Pi GPIO pins.
+Control the physical access indicator LEDs connected to the
+Raspberry Pi GPIO header.
 
-It exposes the same public interface as MockLEDController, allowing
-the application to switch between development and production hardware
-without changing the application logic.
+Architecture
+------------
+The application communicates with this controller only through
+its public methods.
+
+Because this class exposes the same interface as MockLEDController,
+the active hardware backend can be selected dynamically through the
+HardwareFactory without modifying the application logic.
+
+Platform
+--------
+This module is intended to run only on Raspberry Pi systems with
+the RPi.GPIO library installed.
+
+Development Note
+----------------
+The RPi.GPIO package is available only on Raspberry Pi systems.
+
+For this reason, the import is wrapped in a try/except block so the
+entire project remains importable and fully developable on non-
+Raspberry Pi platforms such as Windows.
+
+Implementation Note
+-------------------
+RPi.GPIO was selected as the GPIO backend because it provides a
+lightweight and reliable interface for the hardware used in this
+project.
+
+The implementation has been validated on the target Raspberry Pi
+hardware during the hardware integration phase.
 """
 
 try:

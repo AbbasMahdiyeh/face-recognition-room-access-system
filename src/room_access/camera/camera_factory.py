@@ -63,4 +63,22 @@ class CameraFactory:
                 camera_index=camera_index,
             )
 
+        if backend == "raspberry_pi":
+            width = settings.get(
+                "display",
+                "width",
+                1280,
+            )
+
+            height = settings.get(
+                "display",
+                "height",
+                720,
+            )
+
+            return camera_class(
+                width=width,
+                height=height,
+            )
+
         return camera_class()

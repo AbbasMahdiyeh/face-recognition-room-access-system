@@ -31,8 +31,11 @@ class TemperatureFactory:
         """
         Create the configured temperature sensor.
 
-        New sensor backends only need to be registered in
-        TEMPERATURE_SENSOR_REGISTRY.
+        Mock temperature uses a fixed development value.
+
+        Raspberry Pi temperature reads from the configured OneWire
+        device path so the deployment can be adjusted without
+        changing application code.
         """
 
         backend = settings.get(
@@ -49,6 +52,17 @@ class TemperatureFactory:
             raise ValueError(
                 f"Unknown temperature backend: {backend}. "
                 f"Available backends: {available_backends}"
+            )
+
+        if backend == "raspberry_pi":
+            devices_root = settings.get(
+                "hardware",
+                "temperature_sensor_path",
+                "/sys/bus/w1/devices",
+            )
+
+            return sensor_class(
+                devices_root=devices_root,
             )
 
         return sensor_class()

@@ -14,15 +14,15 @@
     "height": 720
   },
   "camera": {
-  "backend": "laptop",
-  "name": "Laptop Webcam",
+  "backend": "raspberry_pi",
+  "name": "Raspberry Pi Camera",
   "index": 0
-  },
-
-  "hardware": {
-  "led_backend": "mock",
-  "temperature_backend": "mock",
+},
+"hardware": {
+  "led_backend": "raspberry_pi",
+  "temperature_backend": "raspberry_pi",
   "green_led_pin": 17,
-  "red_led_pin": 27
-  }
+  "red_led_pin": 27,
+  "temperature_sensor_path": "/sys/bus/w1/devices"
+}
 }

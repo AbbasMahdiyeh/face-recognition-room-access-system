@@ -3,31 +3,26 @@ Hardware registry.
 
 Purpose
 -------
-Provide a single place where hardware implementations
-are registered.
+Register available hardware controller implementations.
 
 Why this exists
 ---------------
-The application should remain independent from concrete
-hardware implementations.
+The application should not directly depend on concrete hardware
+controllers.
 
-As new hardware controllers are introduced, they can be
-registered here without increasing the complexity of the
-factory.
-
-Architecture
-------------
-Settings
-    ↓
-HardwareFactory
-    ↓
-HardwareRegistry
-    ↓
-Concrete Hardware Controller
+During laptop development, the system uses mock hardware.
+During Raspberry Pi deployment, the backend can be switched to
+real GPIO hardware through configuration.
 """
 
 from room_access.hardware.led_controller import MockLEDController
+from room_access.hardware.raspberry_pi_led_controller import RaspberryPiLEDController
+
 
 HARDWARE_REGISTRY = {
+    # Development backend
     "mock": MockLEDController,
+
+    # Raspberry Pi GPIO backend
+    "raspberry_pi": RaspberryPiLEDController,
 }
