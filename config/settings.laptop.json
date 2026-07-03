@@ -1,0 +1,28 @@
+{
+  "recognition": {
+    "threshold": 0.5,
+    "recognition_interval": 20
+  },
+  "enrollment": {
+    "capture_count": 5
+  },
+  "display": {
+    "width": 1280,
+    "height": 720
+  },
+  "camera": {
+    "backend": "laptop",
+    "name": "Laptop Webcam",
+    "index": 0
+  },
+  "logging": {
+    "repeat_log_interval_seconds": 10
+  },
+  "hardware": {
+    "led_backend": "mock",
+    "temperature_backend": "mock",
+    "green_led_pin": 17,
+    "red_led_pin": 27,
+    "temperature_sensor_path": "/sys/bus/w1/devices"
+  }
+}
