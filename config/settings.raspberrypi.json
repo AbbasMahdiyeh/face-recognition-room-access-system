@@ -12,7 +12,7 @@
   },
   "camera": {
     "backend": "raspberry_pi",
-    "name": "Raspberry Pi Camera",
+    "name": "R-Pi Camera",
     "index": 0
   },
   "logging": {

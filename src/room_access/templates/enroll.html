@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Enrollment</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <main class="dashboard">
+        <header class="top-bar">
+            <div>
+                <p class="eyebrow">Web Enrollment</p>
+                <h1>User Enrollment</h1>
+            </div>
+
+            <div class="project-meta">
+                <a href="/">Dashboard</a>
+                <a href="/enroll">Enroll</a>
+                <a href="/users">Users</a>
+                <a href="/stats">Stats</a>
+                <a href="/logs">Logs</a>
+                <a href="/health">Health</a>
+            </div>
+        </header>
+
+        {% if user_name %}
+        <section class="content">
+            <section class="video-card">
+                <div class="video-header">
+                    <span class="status-dot"></span>
+                    <span>Enrollment Camera Stream</span>
+                </div>
+
+                <img src="/enroll-stream" alt="Enrollment camera stream">
+            </section>
+
+            <aside class="info-panel">
+                <h2>Enroll User</h2>
+
+                <div class="info-row">
+                    <span>User</span>
+                    <strong>{{ user_name }}</strong>
+                </div>
+
+                <div class="info-row">
+                    <span>Target Images</span>
+                    <strong id="target-count">{{ capture_count }}</strong>
+                </div>
+
+                <div class="info-row">
+                    <span>Captured</span>
+                    <strong id="captured-count">0</strong>
+                </div>
+
+                <button id="capture-button" class="primary-button" onclick="captureImage()">
+                    Capture Image
+                </button>
+
+                <p id="status-message" class="note">
+                    Keep your face centered and press Capture Image.
+                </p>
+            </aside>
+        </section>
+        {% else %}
+        <section class="enrollment-layout">
+            <aside class="guidance-card">
+                <p class="eyebrow">Enrollment Guide</p>
+                <h2>Capture better reference images</h2>
+
+                <ul class="guidance-list">
+                    <li>Use good lighting.</li>
+                    <li>Keep your face centered.</li>
+                    <li>Look directly at the camera.</li>
+                    <li>Avoid sunglasses or strong shadows.</li>
+                    <li>Capture several stable images.</li>
+                </ul>
+            </aside>
+
+            <section class="info-panel enrollment-start">
+                <h2>Start Enrollment</h2>
+
+                <p class="note">
+                    Enter a user name to start browser-based enrollment.
+                </p>
+
+                <input id="user-name-input" class="text-input" placeholder="Example: abbas">
+
+                <button class="primary-button" onclick="startEnrollment()">
+                    Start Enrollment
+                </button>
+            </section>
+        </section>
+        {% endif %}
+    </main>
+
+    <script>
+        function startEnrollment() {
+            const input = document.getElementById("user-name-input");
+            const userName = input.value.trim();
+
+            if (!userName) {
+                alert("Please enter a user name.");
+                return;
+            }
+
+            window.location.href = `/enroll/${encodeURIComponent(userName)}`;
+        }
+
+        async function captureImage() {
+            const button = document.getElementById("capture-button");
+            const statusMessage = document.getElementById("status-message");
+
+            button.disabled = true;
+            button.innerText = "Processing...";
+
+            const response = await fetch("/capture-enrollment", {
+                method: "POST"
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                statusMessage.innerText = data.error || "Capture failed.";
+
+                if (!data.completed) {
+                    button.disabled = false;
+                    button.innerText = "Capture Image";
+                }
+
+                return;
+            }
+
+            document.getElementById("captured-count").innerText = data.captured;
+
+            if (data.completed) {
+                statusMessage.innerText =
+                    "Enrollment completed. Embedding created.";
+
+                button.disabled = true;
+                button.innerText = "Enrollment Complete";
+            } else {
+                statusMessage.innerText =
+                    `Captured image ${data.captured} of ${data.target}.`;
+
+                button.disabled = false;
+                button.innerText = "Capture Image";
+            }
+        }
+    </script>
+</body>
+</html>

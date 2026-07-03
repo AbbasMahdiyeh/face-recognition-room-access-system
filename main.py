@@ -16,7 +16,7 @@ from room_access.recognition.enrollment_manager import EnrollmentManager
 from room_access.storage.user_manager import UserManager
 from room_access.storage.statistics_manager import StatisticsManager
 from room_access.app.health_check import HealthCheck
-from room_access.app.web_access_app import WebAccessApp
+from room_access.app.web_dashboard_app import WebDashboardApp
 
 from room_access.app.version import (
     AI_ENGINE,
@@ -87,7 +87,7 @@ def main():
         app.run()
 
     elif command == "web":
-        app = WebAccessApp()
+        app = WebDashboardApp()
         app.run()
 
     elif command == "enroll":
