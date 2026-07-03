@@ -1,40 +1,50 @@
 """
-Live access-control application.
+Desktop live access-control application.
 
-This module coordinates the full live access-control workflow:
-camera input, face recognition, access decision, dashboard rendering,
-event logging, and event image capture.
+Purpose
+-------
+Run the real-time access-control system with a desktop OpenCV window.
 
-Scripts should only start this application; the main workflow belongs here.
+Architecture
+------------
+This class is responsible only for desktop display.
+
+The shared AI pipeline is handled by FrameProcessor:
+camera frame
+    -> FrameProcessor
+    -> annotated frame
+    -> cv2.imshow()
+
+Why this exists
+---------------
+The project supports multiple output modes.
+
+Desktop mode uses OpenCV windows.
+Web mode streams the same annotated frames to a browser.
+
+Both modes reuse the same processing pipeline, which prevents
+duplicated recognition, logging, LED, and temperature logic.
 """
 
-import time
-from datetime import datetime
 
 import cv2
-
-from room_access.access_control.access_decision import AccessDecisionManager
 from room_access.camera.camera_factory import CameraFactory
-from room_access.dashboard.display_overlay import draw_recognition_overlay
-from room_access.recognition.recognition_engine import RecognitionEngine
-from room_access.storage.event_logger import EventLogger
 from room_access.config.settings import Settings
-from room_access.hardware.hardware_factory import HardwareFactory
-from room_access.hardware.temperature_factory import TemperatureFactory
-
+from room_access.processing.frame_processor import FrameProcessor
 
 
 class LiveAccessApp:
     """
-    Run the real-time face recognition access-control system.
+    Run the desktop version of the access-control system.
     """
 
     def __init__(self):
         """
-        Initialize all long-lived application components once.
+        Initialize shared settings, camera backend, and frame processor.
 
-        The camera, recognition engine, decision manager, and logger are
-        created here so they are not recreated for every video frame.
+        Camera selection is handled by CameraFactory.
+        FrameProcessor owns the AI, access decision, logging,
+        LED feedback, temperature, and overlay pipeline.
         """
 
         self.settings = Settings()
@@ -42,49 +52,18 @@ class LiveAccessApp:
             self.settings,
         )
 
-        self.engine = RecognitionEngine(
-            embeddings_root="data/embeddings",
-            threshold=self.settings.get(
-                "recognition",
-                "threshold",
-            ),
-        )
-
-        self.decision_manager = AccessDecisionManager()
-
-        self.logger = EventLogger(
-            log_path="data/logs/access_events.csv",
-        )
-
-        # Hardware controllers are created through a factory so the
-        # application can switch between mock laptop hardware and
-        # Raspberry Pi GPIO hardware without changing this workflow.
-        self.led_controller = HardwareFactory.create_led_controller(
+        self.frame_processor = FrameProcessor(
             self.settings,
-        )
-
-        # Create the configured temperature sensor backend.
-        # The application remains independent from the concrete
-        # sensor implementation (mock or Raspberry Pi).
-        self.temperature_sensor = (
-            TemperatureFactory.create_temperature_sensor(
-                self.settings,
-            )
-        )
-
-        self.recognition_interval = self.settings.get(
-            "recognition",
-            "recognition_interval",
-        )
-        
-        self.repeat_log_interval_seconds = self.settings.get(
-            "logging",
-            "repeat_log_interval_seconds",
         )
 
     def run(self):
         """
-        Start the live recognition loop.
+        Start the desktop OpenCV live-view loop.
+
+        This method only handles:
+        - reading frames from the camera
+        - sending frames to FrameProcessor
+        - displaying annotated frames with cv2.imshow()
         """
 
         if not self.camera.open():
@@ -94,23 +73,6 @@ class LiveAccessApp:
         print("Real-time recognition started.")
         print("Press 'q' or 'Esc' to exit.")
 
-        previous_time = time.time()
-        fps = 0.0
-        recognition_time_ms = 0.0
-
-        frame_count = 0
-        last_result = None
-
-        last_log_time = 0.0
-        last_logged_identity = None
-        last_logged_access = None
-
-        camera_name = self.settings.get(
-            "camera",
-            "name",
-            "Unknown Camera",
-        )
-
         while True:
             frame = self.camera.read_frame()
 
@@ -118,106 +80,7 @@ class LiveAccessApp:
                 print("Failed to read frame.")
                 break
 
-            frame = cv2.resize(
-                frame,
-                (
-                    self.settings.get("display", "width"),
-                    self.settings.get("display", "height"),
-                ),
-            )
-
-            frame_count += 1
-
-            if frame_count % self.recognition_interval == 0 or last_result is None:
-                # Measure only the AI recognition step.
-                # This metric helps compare performance across laptop and Raspberry Pi.
-                recognition_start_time = time.time()
-
-                last_result = self.engine.recognize(frame)
-
-                recognition_time_ms = (
-                    time.time() - recognition_start_time
-                ) * 1000
-
-            current_time = time.time()
-            elapsed_time = current_time - previous_time
-
-            if elapsed_time > 0:
-                fps = 1.0 / elapsed_time
-
-            previous_time = current_time
-
-            face_count = (
-                1
-                if last_result is not None and last_result.bbox is not None
-                else 0
-            )
-
-            temperature = self.temperature_sensor.read_temperature()
-            temperature_text = f"{temperature:.1f} C"
-
-            info_lines = [
-                ("Camera", camera_name),
-                ("FPS", f"{fps:.1f}"),
-                ("Faces", str(face_count)),
-                ("AI Time", f"{recognition_time_ms:.1f} ms"),
-                ("Time", datetime.now().strftime("%H:%M:%S")),
-                ("Temp", temperature_text),
-            ]
-
-            annotated_frame = draw_recognition_overlay(
-                frame,
-                last_result,
-                info_lines,
-            )
-
-            if last_result is not None:
-                now = time.time()
-
-                decision = self.decision_manager.decide(
-                    user_name=last_result.user_name,
-                    access_granted=last_result.access_granted,
-                )
-
-                current_identity = decision.user_name
-                current_access = decision.access_granted
-
-                self.led_controller.show_access_result(
-                    access_granted=current_access,
-                )
-
-                identity_changed = (
-                    current_identity != last_logged_identity
-                    or current_access != last_logged_access
-                )
-
-                repeat_interval_passed = (
-                    now - last_log_time >= self.repeat_log_interval_seconds
-                )
-
-                if identity_changed or repeat_interval_passed:
-                    event_name = "granted" if current_access else "denied"
-
-                    image_path = self.logger.save_event_image(
-                        annotated_frame,
-                        event_name,
-                    )
-
-                    self.logger.log_event(
-                        user_name=current_identity,
-                        access_granted=current_access,
-                        similarity=last_result.similarity,
-                        fps=fps,
-                        recognition_time_ms=recognition_time_ms,
-                        temperature=temperature_text,
-                        image_path=image_path,
-                        reason=decision.reason,
-                        camera=camera_name,
-                    )
-
-                    last_logged_identity = current_identity
-                    last_logged_access = current_access
-                    last_log_time = now
+            annotated_frame = self.frame_processor.process_frame(frame)
 
             cv2.imshow(
                 "Face Recognition",

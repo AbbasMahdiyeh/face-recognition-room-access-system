@@ -16,6 +16,7 @@ from room_access.recognition.enrollment_manager import EnrollmentManager
 from room_access.storage.user_manager import UserManager
 from room_access.storage.statistics_manager import StatisticsManager
 from room_access.app.health_check import HealthCheck
+from room_access.app.web_access_app import WebAccessApp
 
 from room_access.app.version import (
     AI_ENGINE,
@@ -49,7 +50,8 @@ def print_usage():
     print("    python main.py <command>")
     print()
     print("Commands:")
-    print("    live            Start real-time face recognition")
+    print("    live            Start desktop live access system")
+    print("    web             Start browser-based live dashboard")
     print("    enroll          Register a new authorized user")
     print("    enroll-all      Rebuild embeddings for all users")
     print("    users           List all authorized users")
@@ -60,6 +62,7 @@ def print_usage():
     print()
     print("Examples:")
     print("    python main.py live")
+    print("    python main.py web")
     print("    python main.py enroll abbas")
     print("    python main.py users")
     print("    python main.py stats")
@@ -81,6 +84,10 @@ def main():
 
     if command == "live":
         app = LiveAccessApp()
+        app.run()
+
+    elif command == "web":
+        app = WebAccessApp()
         app.run()
 
     elif command == "enroll":
@@ -203,7 +210,8 @@ def main():
         print("Available Commands")
         print("-" * 70)
 
-        print("  live            Start real-time face recognition")
+        print("  live            Start desktop live access system")
+        print("  web             Start browser-based live dashboard")
         print("  enroll          Register a new authorized user")
         print("  enroll-all      Rebuild embeddings for all users")
         print("  users           List all authorized users")
