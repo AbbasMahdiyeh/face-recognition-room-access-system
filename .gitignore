@@ -32,3 +32,27 @@ data/logs/*.csv
 
 # Runtime event data
 data/events/
+
+# Authorized users
+data/authorized_faces/*
+!data/authorized_faces/.gitkeep
+
+# Embeddings
+data/embeddings/*
+!data/embeddings/.gitkeep
+
+# Event images
+data/events/*
+!data/events/.gitkeep
+
+# Logs
+data/logs/*
+!data/logs/.gitkeep
+
+# Detected faces
+data/detected_faces/*
+!data/detected_faces/.gitkeep
+
+# Unknown faces
+data/unknown_faces/*
+!data/unknown_faces/.gitkeep

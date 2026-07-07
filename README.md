@@ -1,202 +1,263 @@
-# Face Recognition and Room Access System
+# Embedded AI Face Recognition Room Access System
 
-A modular Embedded Vision and Edge AI project for face recognition-based room access control using Raspberry Pi and Computer Vision technologies.
+<p align="center">
+  <img src="docs/images/banner.png" alt="Face Recognition Room Access System">
+</p>
 
----
+<p align="center">
 
-## Overview
+![Python](https://img.shields.io/badge/Python-3.13-blue?logo=python)
+![OpenCV](https://img.shields.io/badge/OpenCV-4.x-green?logo=opencv)
+![InsightFace](https://img.shields.io/badge/InsightFace-Face%20Recognition-blue)
+![ONNX Runtime](https://img.shields.io/badge/ONNX-Runtime-orange)
+![Flask](https://img.shields.io/badge/Flask-Web%20Dashboard-black?logo=flask)
+![Raspberry Pi](https://img.shields.io/badge/Raspberry%20Pi-5-red?logo=raspberrypi)
 
-This project aims to build a complete room access control system that can:
-
-- Capture images from a camera
-- Detect human faces
-- Recognize authorized users
-- Make access decisions
-- Log access events
-- Store unknown face snapshots
-- Simulate or control physical access hardware
-
-The project follows a clean and modular software architecture and is developed incrementally from simulation to real embedded hardware deployment.
+</p>
 
 ---
 
-## Project Goals
+## Project Overview
 
-- Learn Computer Vision fundamentals
-- Learn Embedded AI workflows
-- Learn Raspberry Pi development
-- Learn software architecture and modular design
-- Build a portfolio-ready GitHub project
-- Create a foundation for future AI and Medical Imaging projects
+The **Face Recognition Room Access System** is a modular embedded AI application that combines computer vision, embedded hardware, and modern software engineering into a smart access control system.
+
+The application captures live video from either a laptop webcam or a Raspberry Pi Camera, performs real-time face recognition using **InsightFace** and **ONNX Runtime**, evaluates access permissions, logs recognition events, controls external hardware, and provides both desktop and browser-based monitoring interfaces.
+
+The project was designed with portability and maintainability in mind. The same application logic runs on both Windows and Raspberry Pi through configurable hardware abstraction layers and factory-based architecture.
+
+This repository demonstrates practical experience in computer vision, embedded AI, Raspberry Pi development, Flask web applications, and modular software architecture.
+
+---
+
+## Features
+
+- Real-time face recognition using InsightFace
+- Laptop Webcam and Raspberry Pi Camera support
+- Desktop OpenCV application
+- Browser-based monitoring dashboard
+- Browser-based user enrollment
+- Automatic embedding generation
+- GPIO controlled status LEDs
+- Temperature sensor integration
+- Automatic event logging
+- Cross-platform deployment (Windows & Raspberry Pi)
+- JSON configuration profiles
+- Modular object-oriented architecture
 
 ---
 
 ## Technology Stack
 
-### Core Technologies
-
-- Python
-- OpenCV
-- InsightFace
-- ONNX Runtime
-- NumPy
-
-### Development Environment
-
-- Git
-- GitHub
-- Visual Studio Code
-
-### Hardware (Planned)
-
-- Raspberry Pi 4
-- Raspberry Pi Camera Module
-- SD Card
-- Green / Red LEDs
-- Temperature Sensor
-- GPIO
+| Category | Technology |
+|------------|------------|
+| Language | Python |
+| Computer Vision | OpenCV |
+| Face Recognition | InsightFace |
+| AI Inference | ONNX Runtime |
+| Web Framework | Flask |
+| Embedded Platform | Raspberry Pi 5 |
+| Hardware | Raspberry Pi Camera, GPIO LEDs, DS18B20 Temperature Sensor |
+| Configuration | JSON |
+| Version Control | Git & GitHub |
 
 ---
 
-## Architecture
+## System Architecture
 
-Current architecture:
+The application follows a modular architecture where camera handling, AI inference, hardware control, logging, configuration, and user interfaces are separated into independent components.
+
+The same processing pipeline is shared between the desktop application and the web dashboard while hardware-specific implementations are selected automatically through factory classes.
+
+<p align="center">
+
+<img src="docs/images/system_architecture.png" width="900">
+
+</p>
+
+---
+
+## Hardware Setup
+
+The Raspberry Pi version demonstrates how computer vision can interact with physical hardware.
+
+Connected hardware includes:
+
+- Raspberry Pi 5
+- Raspberry Pi Camera
+- Green Status LED
+- Red Status LED
+- Temperature Sensor (DS18B20)
+
+<p align="center">
+
+<img src="docs/images/hardware_setup.png" width="850">
+
+</p>
+
+
+---
+
+## Prototype
+
+<p align="center">
+
+<img src="docs/images/raspberry_pi_setup.jpg">
+
+</p>
+
+---
+
+## Project Structure
 
 ```text
-room_access
-├── access_control
-├── app
-├── camera
-├── config
-├── dashboard
-├── hardware
-├── recognition
-└── storage
+face-recognition-room-access-system
+
+├── config/
+├── data/
+├── docs/
+├── scripts/
+├── src/
+│   └── room_access/
+│       ├── app/
+│       ├── camera/
+│       ├── config/
+│       ├── dashboard/
+│       ├── hardware/
+│       ├── processing/
+│       ├── recognition/
+│       ├── static/
+│       ├── storage/
+│       └── templates/
+│
+├── tests/
+│
+├── main.py
+└── README.md
 ```
 
-Each module has a single responsibility and can be extended independently.
+---
+
+## Installation
+
+### Windows
+
+```bash
+git clone https://github.com/AbbasMahdiyeh/face-recognition-room-access-system.git
+
+cd face-recognition-room-access-system
+
+python -m venv .venv
+
+.venv\Scripts\activate
+
+pip install -r requirements.txt
+```
 
 ---
 
-## Development Roadmap
+### Raspberry Pi
 
-### Phase 0
-Project setup and architecture
+```bash
+git clone https://github.com/AbbasMahdiyeh/face-recognition-room-access-system.git
 
-### Phase 1
-Development environment and simulation setup
+cd face-recognition-room-access-system
 
-### Phase 2
-Image acquisition
+python3 -m venv .venv
 
-### Phase 3
-Face detection
+source .venv/bin/activate
 
-### Phase 4
-Face recognition
-
-### Phase 5
-Access control logic
-
-### Phase 6
-Logging and storage
-
-### Phase 7
-Dashboard
-
-### Phase 8
-Raspberry Pi integration
-
-### Phase 9
-GPIO integration
-
----
-## Current Status
-
-The project currently includes the following implemented features:
-
-- Real-time face recognition
-- Live dashboard overlay
-- Authorized user enrollment
-- Automatic embedding generation
-- Event logging to CSV
-- Event image capture
-- Camera factory and registry
-- Hardware factory and registry
-- Mock LED controller
-- Mock temperature sensor
-- Centralized configuration system
-- Raspberry Pi ready architecture
+pip install -r requirements-raspberrypi.txt
+```
 
 ---
 
-## Running the Project
+## Usage
 
-### Run the live access control system
+### Desktop Application
 
 ```bash
 python main.py live
 ```
 
-### Enroll a new authorized user
+Starts the OpenCV desktop application with real-time face recognition.
+
+---
+
+### Web Dashboard
 
 ```bash
-python main.py enroll <user_name>
+python main.py web
+```
+
+Starts the Flask web server.
+
+After launching the application, open your browser and navigate to:
+
+```text
+http://<raspberry-pi-ip>:5000
 ```
 
 Example:
 
-```bash
-python main.py enroll abbas
-```
-
-### Rebuild embeddings for all authorized users
-
-```bash
-python main.py enroll-all
+```text
+http://192.168.1.25:5000
 ```
 
 ---
 
-## Configuration
+### User Enrollment
 
-Project configuration is stored in:
+```bash
+python main.py enroll
+```
+
+Registers new users and generates facial embeddings automatically.
+
+---
+
+### User Enrollment (Web Dashboard)
+
+Start the Web Dashboard:
+
+```bash
+python main.py web
+```
+
+Then open:
 
 ```text
-config/settings.json
+http://<raspberry-pi-ip>:5000/enroll
 ```
 
-Current configurable components include:
-
-- Recognition threshold
-- Camera backend
-- Display resolution
-- Recognition interval
-- Hardware backend
-- Enrollment capture count
-
----
-
-## Runtime Data
-
-The following folders are generated automatically during execution:
+Example:
 
 ```text
-data/events/
-data/logs/
-data/embeddings/
+http://192.168.1.25:5000/enroll
 ```
 
-These files are excluded from Git where appropriate.
+The browser-based enrollment interface captures multiple reference images and automatically generates the user's facial embedding.
 
 ---
 
-## Future Work
+## Future Improvements
 
-- Raspberry Pi Camera integration
-- Real Raspberry Pi GPIO integration
-- Physical temperature sensor integration
-- Final production UI
-- Documentation improvements
-- UML diagrams
-- Version 1.0 release
+- Face Anti-Spoofing
+- Multi-camera Support
+- Door Relay Integration
+- RFID Authentication
+- User Roles & Permissions
+- SQLite / PostgreSQL Support
+- REST API
+- Docker Deployment
+- Mobile Dashboard
+- Web-based User Management
+
+---
+
+## License
+
+This project is released under the MIT License.
+
+---
+
+Developed as part of a personal portfolio project to explore Embedded AI, Computer Vision, Raspberry Pi, and modern software architecture.
