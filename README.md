@@ -68,11 +68,6 @@ The application follows a modular architecture where camera handling, AI inferen
 
 The same processing pipeline is shared between the desktop application and the web dashboard while hardware-specific implementations are selected automatically through factory classes.
 
-<p align="center">
-
-<img src="docs/images/system_architecture.png" width="900">
-
-</p>
 
 ---
 
@@ -90,20 +85,10 @@ Connected hardware includes:
 
 <p align="center">
 
-<img src="docs/images/hardware_setup.png" width="850">
+<img src="docs/images/raspberry_pi_setup.png" width="850">
 
 </p>
 
-
----
-
-## Prototype
-
-<p align="center">
-
-<img src="docs/images/raspberry_pi_setup.jpg">
-
-</p>
 
 ---
 
@@ -214,6 +199,7 @@ python main.py enroll
 Registers new users and generates facial embeddings automatically.
 
 ---
+
 
 ### User Enrollment (Web Dashboard)
 
